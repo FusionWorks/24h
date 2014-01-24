@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="10dp"
+    android:orientation="horizontal"
+    android:background="#000"
+    android:gravity="center"
+    android:tag="top_animation"
+    android:visibility="gone"
+    android:onClick="hideAlertAnimation">
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No internet connection"
+        android:textSize="18sp"
+        android:tag="vii"
+        android:textColor="#fff"/>
+</LinearLayout>

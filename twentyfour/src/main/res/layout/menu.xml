@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="270dp"
+    android:layout_height="fill_parent"
+    android:background="#282828"
+    android:cacheColorHint="#32394a"
+    android:orientation="vertical" >
+    <ImageView
+        android:id="@+id/userThumb"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"/>
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="name"
+        android:textSize="20sp"
+        android:layout_marginTop="15dp"
+        android:layout_toRightOf="@id/userThumb"/>
+    <RelativeLayout
+        android:id="@+id/relativeMenuView"
+        android:layout_width="270dp"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/userThumb"
+        android:cacheColorHint="#32394a"
+        android:orientation="vertical" >
+        <ListView
+            android:id="@+id/menu"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="left"
+            android:paddingRight="5dp"
+            android:paddingLeft="7dp"
+            android:divider="#c3c7c9"
+            android:tag="menu1"
+            android:dividerHeight="1dp"
+            android:fadingEdge="vertical"
+            android:fadingEdgeLength="5sp"
+            android:cacheColorHint="#00000000"
+            android:scrollingCache="false" />
+    </RelativeLayout>
+
+</RelativeLayout>

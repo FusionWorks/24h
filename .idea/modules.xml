@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/libraries/facebook/facebook.iml" filepath="$PROJECT_DIR$/libraries/facebook/facebook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
+      <module fileurl="file://$PROJECT_DIR$/twentyfour.iml" filepath="$PROJECT_DIR$/twentyfour.iml" />
+      <module fileurl="file://$PROJECT_DIR$/twentyfour/twentyfour-twentyfour.iml" filepath="$PROJECT_DIR$/twentyfour/twentyfour-twentyfour.iml" />
+    </modules>
+  </component>
+</project>
+
