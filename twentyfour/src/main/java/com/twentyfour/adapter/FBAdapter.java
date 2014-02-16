@@ -2,6 +2,7 @@ package com.twentyfour.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +64,7 @@ public class FBAdapter extends ArrayAdapter<FBSortedEvent> {
         eventDesc.setText(event.desc);
         eventPlace.setText(" " + event.place);
         String time = event.time.substring(0, event.time.length()-4);
-        eventTime.setText(" "+ fromDateToUnix(time));
+        eventTime.setText(" "+ fromDateToUnix(event.time));
         FBFriend fbFriend = friends.get(0);
         friendsName.setText(fbFriend.name);
         for(FBFriend friend : friends){
@@ -98,14 +99,16 @@ public class FBAdapter extends ArrayAdapter<FBSortedEvent> {
     }
 
     public String fromDateToUnix(String time){
+        Log.v("24h", "time "+time);
         SimpleDateFormat sdf  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         Date date = null;
         try {
             date = sdf.parse(time);
         } catch (ParseException e) {
             e.printStackTrace();
+            return "no time";
         }
-
+        Log.v("24h", "date "+date);
         date = new Date(date.getTime());
         DateFormat dateFormat = android.text.format.DateFormat.getTimeFormat(activity);
 

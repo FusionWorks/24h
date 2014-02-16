@@ -172,7 +172,7 @@ public class EventsActivity extends Activity {
                     "(SELECT eid, uid FROM event_member WHERE uid IN " +
                     "(SELECT uid FROM user WHERE uid IN " +
                     "(SELECT uid2 FROM friend WHERE uid1 = me())) " +
-                    "AND (rsvp_status = \"attending\" OR rsvp_status = \"unsure\")  " +
+                    "AND (rsvp_status = \"attending\" OR rsvp_status = \"unsure\" OR rsvp_status = \"not_replied\" )  " +
                     "AND start_time >'"+today+"' AND start_time < '"+tommorrow+"')  " +
                     "AND start_time >'"+today+"' AND start_time < '"+tommorrow+"'";
 //        }else if (selection.equals("my_city")){
@@ -211,17 +211,16 @@ public class EventsActivity extends Activity {
     }
 
     public void getTimeInterval(){
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd HH");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         today = (String)dateFormat.format(cal.getTime());
-        today += ":00:00";
+//        today += ":00:00";
         Log.v("24h", "today "+today);
         TestFlight.log("today "+today);
 
         cal.add(Calendar.DATE,1);  // number of days to add
         tommorrow = (String)(dateFormat.format(cal.getTime()));
-        tommorrow += ":00:00";
+//        tommorrow += ":00:00";
         Log.v("24h", "today "+tommorrow);
         TestFlight.log("today " + tommorrow);
     }

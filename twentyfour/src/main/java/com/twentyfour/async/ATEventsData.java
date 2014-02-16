@@ -110,10 +110,13 @@ public class ATEventsData extends AsyncTask<Void, Void, Void> {
 
                                 String city = "no city";
                                 try{
-                                    city = object.getJSONObject("venue").getString("city");
+                                    JSONArray empty = object.getJSONArray("venue");
+                                }catch (JSONException e){
+                                    try{
+                                        city = object.getJSONObject("venue").getString("city");
+                                    }catch(NullPointerException e2){
 
-                                }catch(NullPointerException e){
-
+                                    }
                                 }
 
                                 FBEvent event = new FBEvent(eid, name, desc, time, picture, creator, place, attendingCount, city);
