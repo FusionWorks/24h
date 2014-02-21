@@ -26,10 +26,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by AGalkin on 12/16/13.
@@ -123,6 +120,8 @@ public class ATFriends extends AsyncTask<Void, Void, Void> {
             Log.v("24h","cities -- "+activity.cities);
 
             Log.v("24h","friends --- "+activity.friends);
+
+            activity.allArray = fbSortedEventArray;
             activity.initiateList(fbSortedEventArray, activity.cities.toArray(new String[activity.cities.size()]), activity.friends.toArray(new String[activity.friends.size()]));
             activity.fbSorted = fbSortedEventArray;
             loadingView.setVisibility(View.GONE);

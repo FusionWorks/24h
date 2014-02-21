@@ -1,5 +1,6 @@
 package com.twentyfour.menu;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -8,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import com.facebook.android.Util;
 import com.twentyfour.R;
 import com.twentyfour.main.EventsActivity;
 import com.twentyfour.utility.Utility;
@@ -21,6 +21,8 @@ public class NavMenu {
     String[] menuContent;
     String[] buttonTitles;
     SharedPreferences prefs;
+    SharedPreferences mSettings;
+    public static final String APP_PREFERENCES = "settings";
 
 	public NavMenu(EventsActivity in_screen, SlideHolder in_mSlideHolder, int in_position_id){
 		Log.v("NavMenu", "NAVMENU CREATED");
@@ -35,16 +37,24 @@ public class NavMenu {
 		return screen.findViewById(id);
 	}
 	public void initiateMenu(){
-
+        mSettings = screen.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        String eventsString = "";
+        if(mSettings.getString("cities", "").length() > 0){
+            eventsString = "Events in " + mSettings.getString("cities", "");
+        }
+        else{
+            eventsString = "Events in all cities";
+        }
             menuContent = new String[]{
-                    "All friend events",
-                    "Events in ...",
-                    "Follow a friend"
+                    eventsString,
+                    "Follow a friend",
+                    "All events (Invited only)",
+                    "All events joined"
             };
 
         ListView myList = (ListView) screen.findViewById(R.id.menu);
         MenuAdapter newsEntryAdapter = new MenuAdapter(screen, menuContent, R.layout.list_item_menu, this);
-        myList.setAdapter(newsEntryAdapter);
+        myList.setAdapter(newsEntryAdapter) ;
 
 		myList.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -59,21 +69,14 @@ public class NavMenu {
     }
 	public void selectedItem(int position){
 		switch(position){
-			case 0:
-                Log.v("24h","pos "+position);
-//                screen.loadingView(1);
-                screen.selection = "all";
-                screen.getEvents();
-                mSlideHolder.close();
-				break;
-//			case 1:
+//			case 0:
 //                Log.v("24h","pos "+position);
 ////                screen.loadingView(1);
-//                screen.selection = "my_city";
+//                screen.selection = "all";
 //                screen.getEvents();
 //                mSlideHolder.close();
-//                break;
-            case 1:
+//				break;
+            case 0:
                 Log.v("24h","pos "+position);
                 if(screen.fbSorted.size()>0){
                     screen.openChoice(false, true);
@@ -82,7 +85,7 @@ public class NavMenu {
                 }
                 mSlideHolder.close();
                 break;
-			case 2:
+			case 1:
                 Log.v("24h","pos "+position);
                 if(screen.fbSorted.size()>0){
                     screen.openChoice(true, false);
@@ -91,10 +94,23 @@ public class NavMenu {
                 }
                 mSlideHolder.close();
                 break;
+            case 2:
+                mSettings.getBoolean("attending",false);
+                mSettings.getBoolean("invite",true);
+                screen.getEvents();
+                mSlideHolder.close();
+                break;
+            case 3:
+                mSettings.getBoolean("attending",true);
+                mSettings.getBoolean("invite",false);
+                screen.getEvents();
+                mSlideHolder.close();
+                break;
 		}
 	}
 
 	public void showMenu(View view){
+        initiateMenu();
 		Log.v("DoubleMap", "Show menu");
 		mSlideHolder.toggle();
 		/*
