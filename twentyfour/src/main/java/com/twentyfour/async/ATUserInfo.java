@@ -33,6 +33,7 @@ public class ATUserInfo extends AsyncTask<Void, Void, Void> {
     public EventsActivity activity;
     public RelativeLayout loadingView;
     FBFriend userInfo;
+    Drawable pic;
     public ATUserInfo(String query, EventsActivity activity, RelativeLayout loadingView){
         super();
         this.query = query;
@@ -67,8 +68,8 @@ public class ATUserInfo extends AsyncTask<Void, Void, Void> {
                                 JSONArray arr = new JSONArray(gr.asMap().get("data").toString());
                                 Log.v("CL", "arr "+arr);
                                 JSONObject obj = new JSONObject(arr.getJSONObject(0).toString());
-                                Drawable pic = Utility.drawableFromUrl(obj.getString("pic"), activity);
-                                userInfo = new FBFriend(obj.getString("uid"), obj.getString("name"), pic);
+                                pic = Utility.drawableFromUrl(obj.getString("pic"), activity);
+                                userInfo = new FBFriend(obj.getString("uid"), obj.getString("name"), "");
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -84,6 +85,6 @@ public class ATUserInfo extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void params) {
-        activity.setUserInfo(userInfo);
+        activity.setUserInfo(userInfo, pic);
     }
 }

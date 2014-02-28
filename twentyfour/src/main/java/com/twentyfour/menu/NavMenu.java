@@ -78,32 +78,32 @@ public class NavMenu {
 //				break;
             case 0:
                 Log.v("24h","pos "+position);
-                if(screen.fbSorted.size()>0){
+                if(screen.citiesList.length > 0){
                     screen.openChoice(false, true);
                 }else{
-                    Utility.alertView("No events available",screen);
+                    Utility.alertView("No cities",screen);
                 }
                 mSlideHolder.close();
                 break;
 			case 1:
                 Log.v("24h","pos "+position);
-                if(screen.fbSorted.size()>0){
+                if(screen.friendsList.length > 0){
                     screen.openChoice(true, false);
                 }else{
-                    Utility.alertView("No events available",screen);
+                    Utility.alertView("No friends",screen);
                 }
                 mSlideHolder.close();
                 break;
             case 2:
-                mSettings.getBoolean("attending",false);
-                mSettings.getBoolean("invite",true);
-                screen.getEvents();
+                mSettings.edit().putBoolean("attending",false).commit();
+                mSettings.edit().putBoolean("invite",true).commit();
+                screen.getAll();
                 mSlideHolder.close();
                 break;
             case 3:
-                mSettings.getBoolean("attending",true);
-                mSettings.getBoolean("invite",false);
-                screen.getEvents();
+                mSettings.edit().putBoolean("attending",true).commit();
+                mSettings.edit().putBoolean("invite",false).commit();
+                screen.getAll();
                 mSlideHolder.close();
                 break;
 		}
