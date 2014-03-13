@@ -14,19 +14,16 @@ import com.twentyfour.main.EventsActivity;
 import com.twentyfour.utility.Utility;
 
 public class NavMenu {
-	public SlideHolder mSlideHolder;
 	public EventsActivity screen;
 	private int position_id;
 	//public static
     String[] menuContent;
-    String[] buttonTitles;
     SharedPreferences prefs;
     SharedPreferences mSettings;
     public static final String APP_PREFERENCES = "settings";
 
-	public NavMenu(EventsActivity in_screen, SlideHolder in_mSlideHolder, int in_position_id){
+	public NavMenu(EventsActivity in_screen, int in_position_id){
 		Log.v("NavMenu", "NAVMENU CREATED");
-		mSlideHolder = in_mSlideHolder;
         screen = in_screen;
 		position_id = in_position_id;
         prefs = PreferenceManager.getDefaultSharedPreferences(screen);
@@ -39,15 +36,21 @@ public class NavMenu {
 	public void initiateMenu(){
         mSettings = screen.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         String eventsString = "";
-        if(mSettings.getString("cities", "").length() > 0){
-            eventsString = "Events in " + mSettings.getString("cities", "");
+        if(mSettings.getString("cities", "").length() > 0 && mSettings.getBoolean("citiesClickled", false)){
+            String str = mSettings.getString("cities", "");
+            eventsString = "Events in " + str;
         }
         else{
             eventsString = "Events in all cities";
+            String str = mSettings.getString("cities", "");
+            if(str.length() > 0){
+                eventsString = "Events in " + str;
+            }
+            Log.v("24h", "str " + str );
         }
             menuContent = new String[]{
                     eventsString,
-                    "Follow a friend",
+                    "Follow a friend\n(Will not apply city filter)",
                     "All events (Invited only)",
                     "All events joined"
             };
@@ -81,30 +84,30 @@ public class NavMenu {
                 if(screen.citiesList.length > 0){
                     screen.openChoice(false, true);
                 }else{
-                    Utility.alertView("No cities",screen);
+                    Utility.alertView("No cities",screen, false);
                 }
-                mSlideHolder.close();
+                screen.findViewById(R.id.mainMenu).setVisibility(View.GONE);
                 break;
 			case 1:
                 Log.v("24h","pos "+position);
                 if(screen.friendsList.length > 0){
                     screen.openChoice(true, false);
                 }else{
-                    Utility.alertView("No friends",screen);
+                    Utility.alertView("No friends",screen, false);
                 }
-                mSlideHolder.close();
+                screen.findViewById(R.id.mainMenu).setVisibility(View.GONE);
                 break;
             case 2:
                 mSettings.edit().putBoolean("attending",false).commit();
                 mSettings.edit().putBoolean("invite",true).commit();
                 screen.getAll();
-                mSlideHolder.close();
+                screen.findViewById(R.id.mainMenu).setVisibility(View.GONE);
                 break;
             case 3:
                 mSettings.edit().putBoolean("attending",true).commit();
                 mSettings.edit().putBoolean("invite",false).commit();
                 screen.getAll();
-                mSlideHolder.close();
+                screen.findViewById(R.id.mainMenu).setVisibility(View.GONE);
                 break;
 		}
 	}
@@ -112,7 +115,7 @@ public class NavMenu {
 	public void showMenu(View view){
         initiateMenu();
 		Log.v("DoubleMap", "Show menu");
-		mSlideHolder.toggle();
+        screen.findViewById(R.id.mainMenu).setVisibility(View.VISIBLE);
 		/*
 		if (mSlideHolder.isOpened()) {
 			Log.d("showMenu", "isOpen");

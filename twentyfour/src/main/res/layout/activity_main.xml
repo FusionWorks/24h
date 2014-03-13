@@ -3,15 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.twentyfour.menu.SlideHolder
-        android:id="@+id/slideHolder"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-    <include
-        android:id="@+id/leftMenu"
-        android:layout_width="match_parent"
-        layout="@layout/menu" />
 
         <RelativeLayout
             android:id="@+id/content"
@@ -49,5 +40,51 @@
                     android:layout_centerInParent="true"/>
                 </RelativeLayout>
             </RelativeLayout>
-        </com.twentyfour.menu.SlideHolder>
+    <RelativeLayout
+        android:id="@+id/mainMenu"
+        android:layout_width="fill_parent"
+        android:layout_height="400dp"
+        android:background="#282828"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:cacheColorHint="#32394a"
+        android:orientation="vertical" >
+        <ImageView
+            android:id="@+id/userThumb"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"/>
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="name"
+            android:textSize="20sp"
+            android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/userThumb"/>
+        <RelativeLayout
+            android:id="@+id/relativeMenuView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/userThumb"
+            android:cacheColorHint="#32394a"
+            android:orientation="vertical" >
+            <ListView
+                android:id="@+id/menu"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="left"
+                android:paddingRight="5dp"
+                android:paddingLeft="7dp"
+                android:divider="#c3c7c9"
+                android:tag="menu1"
+                android:dividerHeight="1dp"
+                android:fadingEdge="vertical"
+                android:fadingEdgeLength="5sp"
+                android:cacheColorHint="#00000000"
+                android:scrollingCache="false" />
+        </RelativeLayout>
+
+    </RelativeLayout>
 </RelativeLayout>

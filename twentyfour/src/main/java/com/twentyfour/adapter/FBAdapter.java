@@ -1,6 +1,7 @@
 package com.twentyfour.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -30,12 +31,14 @@ public class FBAdapter extends ArrayAdapter<FBEvent> {
     private ArrayList<FBEvent> data;
     private EventsActivity activity;
     LinearLayout eventGoingPhotos;
-//    LinearLayout eventGoingPhotosFirst;
+    SharedPreferences mSettings;
+    public static final String APP_PREFERENCES = "settings";
     boolean first;
     public FBAdapter(EventsActivity activity, ArrayList<FBEvent> data) {
         super(activity, R.layout.activity_main,data);
         this.activity=activity;
         this.data=data;
+        mSettings = activity.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -80,7 +83,13 @@ public class FBAdapter extends ArrayAdapter<FBEvent> {
             count++;
             if(count>8) break;
         }
-        alsoGoing.setText("and other " + item.attendingCount + " are going");
+        if(mSettings.getBoolean("attending", false)){
+            alsoGoing.setText("and other " + item.attendingCount + " are going");
+        }else if(mSettings.getBoolean("invite",false)){
+            alsoGoing.setText("and other " + item.attendingCount + " are invited");
+        }else{
+            alsoGoing.setText("and other " + item.attendingCount + " are invited");
+        }
 
         return rowView;
     }

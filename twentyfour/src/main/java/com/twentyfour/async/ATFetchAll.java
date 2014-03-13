@@ -11,7 +11,6 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphObject;
-import com.testflightapp.lib.TestFlight;
 import com.twentyfour.main.EventsActivity;
 import com.twentyfour.object.FBEvent;
 import com.twentyfour.object.FBFriend;
@@ -48,11 +47,8 @@ public class ATFetchAll extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-        citiesHash.add("1st All cities");
-        friendsHash.add("1st All friends");
         eventsArray = new ArrayList<FBEvent>();
         Log.v("24h", "fqlQuery " + fqlQuery);
-        TestFlight.log("fqlQuery " + fqlQuery);
         Bundle bundle = new Bundle();
         bundle.putString("q", fqlQuery);
         Session session = Session.getActiveSession();

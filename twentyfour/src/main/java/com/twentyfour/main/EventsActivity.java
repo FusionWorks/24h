@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -19,13 +20,11 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.testflightapp.lib.TestFlight;
 import com.twentyfour.R;
 import com.twentyfour.adapter.FBAdapter;
 import com.twentyfour.async.ATFetchAll;
 import com.twentyfour.async.ATUserInfo;
 import com.twentyfour.menu.NavMenu;
-import com.twentyfour.menu.SlideHolder;
 import com.twentyfour.object.FBEvent;
 import com.twentyfour.object.FBFriend;
 import com.twentyfour.utility.PullToRefreshListView;
@@ -36,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 
 
 public class EventsActivity extends Activity {
@@ -45,7 +45,6 @@ public class EventsActivity extends Activity {
     ListView fbList ;
     String query;
     Button menuButton;
-    SlideHolder mSlideHolder;
     public String[] friendsList;
     public String[] citiesList;
     public ArrayList<FBEvent> allArray = new ArrayList<FBEvent>();
@@ -55,21 +54,19 @@ public class EventsActivity extends Activity {
     public static final String APP_PREFERENCES = "settings";
     boolean attending = false;
     boolean invite = false;
+    HashMap<String, Boolean> tempTitles = new HashMap<String, Boolean>();
+    String[] dialogData = null;
+    HashMap<String, Boolean> citiesStaticFilter = new HashMap<String, Boolean>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-        MyTestFlightApp app = new MyTestFlightApp();
-        app.onCreate();
         loadingView = (RelativeLayout)findViewById(R.id.loadingAnimationContent);
         fbList = (ListView)findViewById(R.id.FBList);
         menuButton = (Button)findViewById(R.id.menu_button);
         getTimeInterval();
-        mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
-        mSlideHolder.setEnabled(false);
-        mSlideHolder.setAllowInterceptTouch(false);
-        navMenu = new NavMenu(this, mSlideHolder, 0);
+        navMenu = new NavMenu(this, 0);
         final Animation animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fading_in_menu_button);
         final Animation animationFadeOut = AnimationUtils.loadAnimation(this, R.anim.fading_out_menu_button);
 
@@ -77,7 +74,6 @@ public class EventsActivity extends Activity {
             @Override
             public void onRefresh() {
                 getAll();
-                mSlideHolder.setEnabled(false);
             }
         });
 
@@ -86,8 +82,8 @@ public class EventsActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position,
                                     long arg3) {
-            // TODO Auto-generated method stub
-            Log.d("############","Items " + position );
+                // TODO Auto-generated method stub
+                Log.d("############", "Items " + position);
 
             }
         });
@@ -97,7 +93,6 @@ public class EventsActivity extends Activity {
                 navMenu.showMenu(null);
             }
         });
-        TestFlight.log("App onCreate");
         Reachability reachability = new Reachability(this);
         if(reachability.isOnline()){
             query = "SELECT uid, name, pic FROM user WHERE uid = me()";
@@ -141,7 +136,6 @@ public class EventsActivity extends Activity {
         fbList.setAdapter(fbAdapter);
         fbAdapter.notifyDataSetChanged();
         ((PullToRefreshListView) fbList).onRefreshComplete();
-        mSlideHolder.setEnabled(true);
         loadingView.setVisibility(View.GONE);
     }
 
@@ -150,41 +144,41 @@ public class EventsActivity extends Activity {
         Calendar cal = Calendar.getInstance();
         today = (String)dateFormat.format(cal.getTime());
 //        today += ":00:00";
-        Log.v("24h", "today "+today);
-        TestFlight.log("today "+today);
+        Log.v("24h", "today " + today);
 
         cal.add(Calendar.DATE,1);  // number of days to add
         tommorrow = (String)(dateFormat.format(cal.getTime()));
 //        tommorrow += ":00:00";
-        Log.v("24h", "today "+tommorrow);
-        TestFlight.log("today " + tommorrow);
+        Log.v("24h", "today " + tommorrow);
     }
 
     public void showAlert(){
-        Utility.alertView("No events upcoming now",this);
+        Utility.alertView("No events upcoming now",this, false);
     }
 
     public void openChoice(final Boolean friends, final Boolean cities){
         String title = "";
-        String[] data = null;
         if (friends){
             title = "Select a friend to follow";
-            data = friendsList;
+            dialogData = friendsList;
+            mSettings.edit().putBoolean("citiesClicked", false).commit();
         }else if (cities){
             title = "Select a city for events";
-            data = citiesList;
+            dialogData = putInListCities(citiesList);
+            mSettings.edit().putBoolean("citiesClicked", true).commit();
         }
 
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(
                 EventsActivity.this);
         builderSingle.setIcon(R.drawable.ic_launcher);
         builderSingle.setTitle(title);
-        Arrays.sort(data);
+        Arrays.sort(dialogData);
+        dialogData = sortAllInTop(dialogData);
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 EventsActivity.this,
-                android.R.layout.select_dialog_multichoice, data);
+                android.R.layout.select_dialog_multichoice, dialogData);
         newArray = new ArrayList<FBEvent>();
-        builderSingle.setNegativeButton("cancel",
+        builderSingle.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
 
                     @Override
@@ -192,44 +186,77 @@ public class EventsActivity extends Activity {
                         dialog.dismiss();
                     }
                 });
+        boolean[] checks = makeChecks(dialogData, cities, friends);
 
-        builderSingle.setMultiChoiceItems(data, null, new DialogInterface.OnMultiChoiceClickListener() {
+        builderSingle.setMultiChoiceItems(dialogData, checks, new DialogInterface.OnMultiChoiceClickListener() {
             public void onClick(DialogInterface dialogInterface, int item, boolean isChecked) {
                 String strName = arrayAdapter.getItem(item);
                 if (item == 0) {
                     Log.v("24h", "allarray count " + allArray.size());
                     mSettings.edit().putString("cities", "").commit();
+//                    mSettings.edit().putString("str", "").commit();
+                    if(cities)
+                        citiesStaticFilter.clear();
+                    if(friends)
+                        tempTitles.clear();
                     initiateList(allArray, citiesList, friendsList);
                     dialogInterface.dismiss();
-                } else {
-                    for (FBEvent event : allArray) {
-                        if (cities && event.city.equals(strName)) {
-                            newArray.add(event);
-                        } else if (friends) {
-                            for (FBFriend friend : event.friends) {
-                                if (friend.name.equals(strName) && isChecked) {
-                                    newArray.add(event);
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                } else if(!isChecked){
+                    tempTitles.remove(strName);
+                    if(cities && citiesStaticFilter.containsKey(strName))
+                        citiesStaticFilter.remove(strName);
+                    if(citiesStaticFilter.size() == 0)
+                        mSettings.edit().putString("cities", "").commit();
+                } else if (isChecked){
+                    tempTitles.put(strName,true);
+                    if(cities)
+                        citiesStaticFilter.put(strName, true);
                 }
             }
         });
         builderSingle.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.v("24h", "new list "+newArray.get(0).friends.get(0).name + "size "+newArray.size());
+                for(int item = 0; item<dialogData.length; item++){
+                    String strName = arrayAdapter.getItem(item);
+                    for (FBEvent event : allArray) {
+                        if (cities && event.city.equals(strName) && !event.city.equals("no city") && tempTitles.containsKey(strName) && tempTitles.get(strName)) {
+                            newArray.add(event);
+                            mSettings.edit().putBoolean("citiesClickled", true).commit();
+                            Log.v("24h", "citiy " + strName);
 
-                String str = "";
-                for(FBEvent fbSorted : newArray){
-                    if(!str.contains(fbSorted.city)){
-                        str += fbSorted.city+",";
+                        } else if (friends) {
+                            mSettings.edit().putBoolean("citiesClickled", false).commit();
+                            for (FBFriend friend : event.friends) {
+                                if (friend.name.equals(strName) && tempTitles.containsKey(strName) && tempTitles.get(strName)) {
+                                    newArray.add(event);
+                                    Log.v("24h", "friend name " + strName);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                mSettings.edit().putString("cities", str).commit();
-                initiateList(newArray, citiesList, friendsList);
+//                String str = "";
+//                for(FBEvent fbSorted : newArray){
+//                    if(!str.contains(fbSorted.city)){
+//                        str += fbSorted.city+",";
+//                    }
+//                }
+                String str = "";
+                String[] arr = citiesStaticFilter.keySet().toArray(new String[citiesStaticFilter.size()]);
+                for(String string : arr)
+                    str +=  ", "+string;
+                if(str.length() > 5)
+                    str = str.substring(2,str.length());
+
+                if(newArray.size() == 0 ){
+                    initiateList(allArray, citiesList, friendsList);
+                }else{
+                    mSettings.edit().putString("cities", str).commit();
+                    initiateList(newArray, citiesList, friendsList);
+                }
+
                 dialog.dismiss();
             }
         });
@@ -239,11 +266,11 @@ public class EventsActivity extends Activity {
 
     public String getFilterIfExists(){
         String str = mSettings.getString("cities", "");
-        if (str.length() == 0) return "";
-        String[] strArray = str.split(",");
-        str = "";
-        for(String s : strArray)
-            str += s;
+//        if (str.length() == 0) return "";
+//        String[] strArray = str.split(", ");
+//        str = "";
+//        for(String s : strArray)
+//            str += s + ", ";
 
         return str;
     }
@@ -254,11 +281,12 @@ public class EventsActivity extends Activity {
         if(str.length()>0){
             Log.v("24h","str " + str);
             for (FBEvent sorted : allArray) {
-                Log.v("24h", "sort "+sorted.city);
-                if(str.contains(sorted.city)){
+                Log.v("24h", "bef sort "+sorted.city);
+                if(str.contains(sorted.city) && !sorted.city.equals("no city")){
                     newArray.add(sorted);
                     Log.v("24h", "sort "+sorted.city);
                 }
+                mSettings.edit().putBoolean("citiesClickled", true).commit();
             }
             FBAdapter fbAdapter = new FBAdapter(this, newArray);
             fbList.setAdapter(fbAdapter);
@@ -266,7 +294,105 @@ public class EventsActivity extends Activity {
         }
     }
 
+    public String[] putInListCities(String[] list){
+        String[] strArray = mSettings.getString("cities", "").split(", ");
+        ArrayList<String> array = new ArrayList<String>(Arrays.asList(list));
+        StringBuilder builder = new StringBuilder();
+        for(String s : list) {
+            builder.append(s);
+        }
+        String stringified = builder.toString();
+        Log.v("24h","stringified " + stringified);
+        for(String element : strArray){
+            Log.v("24h","element " + element);
+            if(!stringified.contains(element))
+                array.add(element);
+        }
+        String[] s = array.toArray(new String[array.size()]);
+        return s;
+    }
 
+//    public boolean[] makeChecks(String[] data){
+//        boolean[] checks = new boolean[data.length];
+//        String str = getFilterIfExists();
+//        if(str.length() == 0){
+//           str =  mSettings.getString("str","");
+//        }
+//        Log.v("24h", "strrrrr "+str);
+//        String newStr = "";
+//        if(str.length()>0){
+//            for (int i=0; i<data.length; i++) {
+//                String dataString = data[i];
+//                Log.v("24h", "item "+dataString);
+//                if(str.contains(dataString) && !dataString.equals("no city")){
+//                    checks[i] = true;
+//                    Log.v("24h","check true " + dataString + "strr "+str);
+//                    newStr += dataString + ",";
+//                }else{
+//                    checks[i] = false;
+//                    Log.v("24h","check false " + dataString + "strr "+str);
+//                }
+//            }
+//            if(newStr.length() > 0)
+//                str = newStr;
+//            mSettings.edit().putString("str", str).commit();
+//        }
+//
+//        return checks;
+//    }
 
+    public boolean[] makeChecks(String[] data, boolean cities, boolean friends){
+        boolean[] checks = new boolean[data.length];
+        if(cities){
+            for(int i=0; i<data.length; i++){
+                if(citiesStaticFilter.containsKey(data[i])){
+                    checks[i] = true;
+                }else{
+                    checks[i] = false;
+                }
+            }
+        }else if (friends){
+            for(int i=0; i<data.length; i++){
+                Log.v("24h","friends "+data[i]);
+                if(tempTitles.containsKey(data[i])){
+                    checks[i] = true;
+                }else{
+                    checks[i] = false;
+                }
+            }
+        }
+        return checks;
+    }
+    
+    public String[] sortAllInTop(String[] data){
+        String[] newString = new String[data.length+1];
+        newString[0] = "All";
+        for(int i=0; i<data.length; i++){
+            newString[i+1] = data[i];
+        }
+        for(String str : newString)
+            Log.v("24h","SORTED "+ str);
+        return newString;
+    }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            findViewById(R.id.mainMenu).setVisibility(View.GONE);
+        }else{
+            return super.onKeyDown(keyCode, event);
+        }
+        return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Reachability reachability = new Reachability(this);
+        if(reachability.isOnline()){
+
+        }else{
+            Utility.alertView("Please check your internet connection",this,true);
+        }
+    }
 }

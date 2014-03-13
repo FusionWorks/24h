@@ -4,16 +4,13 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.android.Util;
 import com.facebook.model.GraphObject;
-import com.testflightapp.lib.TestFlight;
 import com.twentyfour.main.EventsActivity;
 import com.twentyfour.object.FBFriend;
 import com.twentyfour.utility.Utility;
@@ -23,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Created by AGalkin on 1/4/14.
@@ -48,7 +44,6 @@ public class ATUserInfo extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         Log.v(Utility.TAG, "fqlQuery " + this.query);
-        TestFlight.log("fqlQuery " + this.query);
 
         if(this.query.length()>0){
             String fqlQuery = this.query;
@@ -56,7 +51,6 @@ public class ATUserInfo extends AsyncTask<Void, Void, Void> {
             bundle.putString("q", fqlQuery);
             Session session = Session.getActiveSession();
             Log.v("24h", "session " + session);
-            TestFlight.log("session "+session);
             Request request = new Request(session,
                     "/fql",
                     bundle,

@@ -3,6 +3,7 @@ package com.twentyfour.utility;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -41,7 +42,7 @@ public class Utility {
         return dateOut.toString();
     }
 
-    public static void alertView(String message, final Activity activity){
+    public static void alertView(String message, final Activity activity, final boolean needToClose){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
         // set title
         alertDialogBuilder.setTitle("Warning");
@@ -53,6 +54,11 @@ public class Utility {
                 .setPositiveButton("Ok",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
                         alertDialog.cancel();
+                        if (needToClose){
+                            Intent i = new Intent(Intent.ACTION_MAIN);
+                            i.addCategory(Intent.CATEGORY_HOME);
+                            activity.startActivity(i);
+                        }
                     }
                 });
 
